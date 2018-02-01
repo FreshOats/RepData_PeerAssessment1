@@ -31,7 +31,11 @@ reflect the mean and median of the histogram.
 
 ```{r descriptives}
 activity_sums <- activity %>% group_by(date) %>% summarise(sumsteps = sum(steps), meansteps = mean(steps), medsteps = median(steps[steps>0]))
-hist(activity_sums$sumsteps)
+h <- hist(activity_sums$sumsteps)
+print(h)
+png(file = "Hist1.png", width = 480, height = 480, units = "px")
+print(h)
+dev.off()
 print(mean(activity_sums$sumsteps))
 print(median(activity_sums$sumsteps))
 ```
@@ -48,6 +52,9 @@ int_times <- activity %>% group_by(interval) %>% summarise(meanints = mean(steps
 g <- ggplot(int_times, aes(interval, meanints))
 g <- g + geom_line() + labs(x = "Interval", y = "Mean Steps")
 print(g)
+png(file = "int_times.png", width = 480, height = 480, units = "px")
+print(g)
+dev.off()
 max_interval <- filter(int_times, meanints == max(int_times$meanints))
 print(max_interval)
 ```
@@ -71,7 +78,11 @@ data impute.
 
 ```{r imputed descriptives}
 Imputer_D <- Imputer %>% group_by(date) %>% summarise(Imp_steps = sum(steps))
-hist(Imputer_D$Imp_steps)
+h <- hist(Imputer_D$Imp_steps)
+print(h)
+png(file = "Hist2.png", width = 480, height = 480, units = "px")
+print(h)
+dev.off()
 print(mean(Imputer_D$Imp_steps))
 print(median(Imputer_D$Imp_steps))
 ```
@@ -102,6 +113,10 @@ Week <- rbind(int_week, int_end)
 g <- ggplot(Week, aes(x = interval, y = mean_ints))
 g <- g + geom_line() + labs(x = "Interval", y = "Mean Steps") + facet_wrap(~type, nrow=2)
 print(g)
+
+png(file = "Week.png", width = 480, height = 480, units = "px")
+print(g)
+dev.off()
 ```
 
 As the data shows, there appears to be a difference between the weekday and weekend distributions. While the both weekday and weekend plots show the same general interval spike in the morning, the spike on the weekdays has a higher mean, though, throughout the weekend, the mean number of steps appears higher.  
