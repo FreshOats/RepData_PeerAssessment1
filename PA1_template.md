@@ -12,9 +12,37 @@ First, dplyr is used throughout the processing, and is opened in the library. Th
 data is read defining the characters "NA" for missing values, and then filtered out. 
 The format of the date is changed from a character string to "Date"
 
-```{r preprocessing}
+
+```r
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 library(ggplot2)
+```
+
+```
+## Warning: package 'ggplot2' was built under R version 3.4.3
+```
+
+```r
 activity <- read.csv("./repdata%2Fdata%2Factivity/activity.csv", header = TRUE, na.strings = "NA")
 activity <- filter(activity, steps !="NA")
 activity$date <- as.Date(activity$date)
@@ -29,11 +57,28 @@ reflect the mean and median of the histogram.
 
 
 
-```{r descriptives}
+
+```r
 activity_sums <- activity %>% group_by(date) %>% summarise(sumsteps = sum(steps), meansteps = mean(steps), medsteps = median(steps[steps>0]))
 hist(activity_sums$sumsteps)
+```
+
+![](PA1_template_files/figure-html/descriptives-1.png)<!-- -->
+
+```r
 print(mean(activity_sums$sumsteps))
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 print(median(activity_sums$sumsteps))
+```
+
+```
+## [1] 10765
 ```
 
 ## What is the average daily activity pattern?
@@ -43,13 +88,26 @@ following until 11:55pm. The maximum mean number of steps in any given interval
 was printed along with the corresponding interval number. 
 
 
-```{r itervals}
+
+```r
 int_times <- activity %>% group_by(interval) %>% summarise(meanints = mean(steps), medianints = median(steps))
 g <- ggplot(int_times, aes(interval, meanints))
 g <- g + geom_line() + labs(x = "Interval", y = "Mean Steps")
 print(g)
+```
+
+![](PA1_template_files/figure-html/itervals-1.png)<!-- -->
+
+```r
 max_interval <- filter(int_times, meanints == max(int_times$meanints))
 print(max_interval)
+```
+
+```
+## # A tibble: 1 x 3
+##   interval meanints medianints
+##      <int>    <dbl>      <int>
+## 1      835 206.1698         19
 ```
 
 ## Imputing missing values
@@ -57,11 +115,23 @@ The original data is brought up again, but this time the NA values are imputed
 rather than ignored. The number of rows with NA values recorded is first shown.
 The NA values will be replaced with the Median value of each interval.  
 
-```{r imputing}
+
+```r
 Imputer <- read.csv("./repdata%2Fdata%2Factivity/activity.csv", header = TRUE, na.strings = "NA")
 print(sum(is.na(Imputer)))
+```
+
+```
+## [1] 2304
+```
+
+```r
 Imputer <- Imputer %>% group_by(interval) %>% mutate(steps = ifelse(is.na(steps), median(steps, na.rm = TRUE), steps))
 print(sum(is.na(Imputer)))
+```
+
+```
+## [1] 0
 ```
 
 The new dataset "Imputer" is a copy of the original data, which then uses the median
@@ -69,11 +139,28 @@ of each interval group to replace the number of steps for all NA values. Prior t
 this, the number of NA values was printed, and then confirmed as '0' following the 
 data impute. 
 
-```{r imputed descriptives}
+
+```r
 Imputer_D <- Imputer %>% group_by(date) %>% summarise(Imp_steps = sum(steps))
 hist(Imputer_D$Imp_steps)
+```
+
+![](PA1_template_files/figure-html/imputed descriptives-1.png)<!-- -->
+
+```r
 print(mean(Imputer_D$Imp_steps))
+```
+
+```
+## [1] 9503.869
+```
+
+```r
 print(median(Imputer_D$Imp_steps))
+```
+
+```
+## [1] 10395
 ```
 
 These Values differ from those obtained when not imputing the data. In both cases 
@@ -87,7 +174,8 @@ Initially, we can add a new column to the Imputer file adding the weekday of eac
 date. Then the weekdays and weekends are subsetted into their own dataframes and 
 then re-bound into a dataframe called Week, which is then called up on to plot. 
 
-```{r weekdays}
+
+```r
 Imputer$date <- as.Date(Imputer$date)
 Imputer <- mutate(Imputer, weekday = weekdays(date))
 weekdays <- subset(Imputer, Imputer$weekday != "Saturday" & Imputer$weekday !="Sunday")
@@ -103,5 +191,7 @@ g <- ggplot(Week, aes(x = interval, y = mean_ints))
 g <- g + geom_line() + labs(x = "Interval", y = "Mean Steps") + facet_wrap(~type, nrow=2)
 print(g)
 ```
+
+![](PA1_template_files/figure-html/weekdays-1.png)<!-- -->
 
 As the data shows, there appears to be a difference between the weekday and weekend distributions. While the both weekday and weekend plots show the same general interval spike in the morning, the spike on the weekdays has a higher mean, though, throughout the weekend, the mean number of steps appears higher.  
